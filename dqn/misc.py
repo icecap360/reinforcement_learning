@@ -13,7 +13,8 @@ class Replay:
         self.a_t = a_t
         self.r_t = r_t
 def log_init():
-    os.remove('loss.txt')
+    if os.path.exists('loss.txt'):
+        os.remove('loss.txt')
 def log_train(loss, param_norm = None):
     with open('loss.txt', 'a') as writer:
         writer.write(str(loss) + '\n')

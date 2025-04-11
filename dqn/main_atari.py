@@ -18,9 +18,9 @@ env = gym.make("ALE/Pong", render_mode="rgb_array")
 observation, info = env.reset(seed=42)
 visualize = False
 print_reward = False
-device = 'cuda:2'
+device = 'cuda:0'
 img_size = 256
-n_train_iters = 1e6
+n_train_iters = int(1e6)
 n_start_train_iters = 1000
 p_eval = 1e3
 batch_size = 64
@@ -36,13 +36,13 @@ model = MainModel(
     ), 
     device=device)
 
-model = model.to(device)
+model.to(device)
 optimizer = torch.optim.AdamW(model.q_function.parameters(), lr=1e-4)
 log_init()
 prev_s_t = None
 
 for i in range(n_train_iters):
-    epsilon = min(1, n_start_train_iters/i + 0.05)
+    epsilon = min(1, n_start_train_iters/(i+1) + 0.05)
     rand_float = random.random()
     if rand_float > epsilon:
         action = model.sample_action(prev_s_t)
@@ -68,10 +68,10 @@ for i in range(n_train_iters):
         reward = evaluate(env, model, img_size, visualize=visualize)
         log_eval(reward)
     
-    # if visualize:
-    #     cv2.imshow("Custom Render", frame)
-    #     if cv2.waitKey(1) & 0xFF == ord('q'):
-    #         break
+    if visualize:
+        cv2.imshow("Custom Render", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
     if terminated or truncated:
         observation, info = env.reset()
 env.close()
